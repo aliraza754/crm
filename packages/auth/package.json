@@ -9,6 +9,7 @@
 		"./chat-event-crypto": "./src/chat-event-crypto.ts",
 		"./client": "./src/client.ts",
 		"./cookies": "./src/cookies.ts",
+		"./email-config": "./src/email-config.ts",
 		"./env": "./src/env.ts",
 		"./mcp-crypto": "./src/mcp-crypto.ts",
 		"./mcp-config": "./src/mcp-config.ts",

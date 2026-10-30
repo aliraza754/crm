@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { isGoogleConfigured } from "@crm/auth/env";
+import { isEmailSignInConfigured, isGoogleConfigured } from "@crm/auth/env";
 import { WORKSPACE_ID } from "@crm/auth/organization";
 import type { Db } from "@crm/db";
 import { ForbiddenException } from "@nestjs/common";
@@ -141,5 +141,11 @@ describe("the sign-in page's read", () => {
 		const { sso } = service(null, [OKTA]);
 
 		expect((await sso.signInOptions()).google).toBe(isGoogleConfigured());
+	});
+
+	it("says whether email sign-in is offered, so the page can show the form", async () => {
+		const { sso } = service(null, [OKTA]);
+
+		expect((await sso.signInOptions()).email).toBe(isEmailSignInConfigured());
 	});
 });

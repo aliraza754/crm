@@ -1,5 +1,9 @@
 import { auth } from "@crm/auth/auth";
-import { isGoogleConfigured, isMicrosoftConfigured } from "@crm/auth/env";
+import {
+	isEmailSignInConfigured,
+	isGoogleConfigured,
+	isMicrosoftConfigured,
+} from "@crm/auth/env";
 import { WORKSPACE_ID, workspaceRoleOf } from "@crm/auth/organization";
 import {
 	canConfigureSso,
@@ -124,6 +128,7 @@ export class SsoService {
 		return {
 			google: isGoogleConfigured(),
 			microsoft: isMicrosoftConfigured(),
+			email: isEmailSignInConfigured(),
 			providers: rows.map((row) => ({
 				providerId: row.providerId,
 				name: ssoProviderName(row.providerId),

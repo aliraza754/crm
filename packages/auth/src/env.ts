@@ -46,8 +46,45 @@ const slackCredentials = ():
 	| { clientId: string; clientSecret: string }
 	| undefined => pair("SLACK_CLIENT_ID", "SLACK_CLIENT_SECRET");
 
-const apiUrl =
+const currentApiUrl = (): string =>
 	optional("API_URL") ?? optional("BETTER_AUTH_URL") ?? DEFAULT_API_URL;
+
+const apiUrl = currentApiUrl();
+
+const LOCAL_HOSTS: ReadonlySet<string> = new Set([
+	"localhost",
+	"127.0.0.1",
+	"[::1]",
+]);
+
+const isLocalUrl = (value: string): boolean => {
+	try {
+		return LOCAL_HOSTS.has(new URL(value).hostname);
+	} catch {
+		return false;
+	}
+};
+
+export type EmailTransport =
+	| { kind: "resend"; apiKey: string; from: string }
+	| { kind: "log" }
+	| { kind: "off" };
+
+export function emailTransport(): EmailTransport {
+	const apiKey = optional("RESEND_API_KEY");
+	const from = optional("RESEND_FROM");
+
+	if (apiKey && from) return { kind: "resend", apiKey, from };
+	if (apiKey || from) {
+		throw new Error("RESEND_API_KEY and RESEND_FROM must be set together.");
+	}
+
+	return isLocalUrl(currentApiUrl()) ? { kind: "log" } : { kind: "off" };
+}
+
+export function isEmailSignInConfigured(): boolean {
+	return emailTransport().kind !== "off";
+}
 
 const appUrls = (optional("APP_URL") ?? DEFAULT_APP_URL)
 	.split(",")

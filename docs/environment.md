@@ -43,8 +43,20 @@ the three that is genuinely optional on its own — set it to your tenant's GUID
 refuse other tenants at Microsoft instead of at `ALLOWED_SIGN_IN`. There is **no
 Microsoft equivalent of `hd`**: `tenantId` is the whole of it.
 
-**Neither pair is required, but an install wants one of them or an SSO provider** —
-with none, the sign-in page says so by name rather than rendering nothing.
+**`RESEND_API_KEY` + `RESEND_FROM`** are the third way in: email sign-in, a 6-digit code
+or a link, no passwords. Same pair rule — `emailTransport()` in
+`packages/auth/src/env.ts` throws on one. `RESEND_FROM` must sit on a domain verified in
+Resend. **With neither set the transport depends on `API_URL`**: a localhost API prints
+the code and the link in the log (`log`), any other host turns email sign-in off (`off`).
+Production never prints a code, because it never has a localhost `API_URL`.
+
+**Only addresses `ALLOWED_SIGN_IN` accepts are ever emailed** — `assertMayReceiveEmail`
+refuses the rest before Resend is called, so a stranger cannot spend the sending quota.
+The same list still gates account creation in `databaseHooks.user.create.before`. A
+person who signs in by email has no Gmail or Outlook; their mailbox sync stays empty.
+
+**An install wants one of Google, Microsoft, email or an SSO provider** — with none, the
+sign-in page says so by name rather than rendering nothing.
 
 **`ALLOWED_SIGN_IN`** — comma-separated whole domains or single addresses (bare
 addresses exist for a solo self-hoster, where `gmail.com` would be an open door). **One

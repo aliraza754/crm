@@ -9,6 +9,7 @@ import { genericOAuth } from "better-auth/plugins/generic-oauth";
 import { organization } from "better-auth/plugins/organization";
 import { API_KEY_EXPIRATION, API_KEY_HEADER, API_KEY_PREFIX } from "./api-keys";
 import { AUTH_COOKIE_PREFIX } from "./cookies";
+import { emailSignInPlugins } from "./email-sign-in";
 import { env } from "./env";
 import { ensureWorkspaceMembership } from "./organization";
 import {
@@ -29,6 +30,7 @@ import {
 	hasSignInAllowList,
 	isWorkspaceEmail,
 	primaryWorkspaceDomain,
+	refusalMessage,
 } from "./workspace";
 
 const socialProviders: NonNullable<BetterAuthOptions["socialProviders"]> = {};
@@ -213,6 +215,7 @@ export const auth = betterAuth({
 					slackOAuthCallback,
 				]
 			: []),
+		...emailSignInPlugins(),
 		organization({
 			allowUserToCreateOrganization: false,
 			disableOrganizationDeletion: true,
@@ -270,12 +273,7 @@ export const auth = betterAuth({
 					}
 
 					if (!isWorkspaceEmail(user.email)) {
-						const domain = primaryWorkspaceDomain();
-						throw new APIError("FORBIDDEN", {
-							message: domain
-								? `This CRM is private. Sign in with your @${domain} account.`
-								: "This CRM is private. That address is not on the allow-list.",
-						});
+						throw new APIError("FORBIDDEN", { message: refusalMessage() });
 					}
 
 					return { data: user };

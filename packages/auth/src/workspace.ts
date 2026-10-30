@@ -80,6 +80,13 @@ export function hasSignInAllowList(): boolean {
 	return domains.length > 0 || addresses.length > 0;
 }
 
+export function refusalMessage(): string {
+	const domain = primaryWorkspaceDomain();
+	return domain
+		? `This CRM is private. Sign in with your @${domain} account.`
+		: "This CRM is private. That address is not on the allow-list.";
+}
+
 export function isWorkspaceEmail(email: string | null | undefined): boolean {
 	const value = email?.trim().toLowerCase();
 	if (!value) return false;

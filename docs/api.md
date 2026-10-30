@@ -112,8 +112,13 @@ self-hoster's admin cannot redeploy.
   takes `AuthMiddleware` at the *method*, which is what leaves it open. A client
   secret is never read back out.
 - **It is the API's answer, not the app's** — the API serves `/api/auth/*`.
-- **An install with no Google, no Microsoft and no provider says so**, naming the
-  variables; a read that *fails* falls back to offering Google.
+- **An install with no Google, no Microsoft, no email and no provider says so**, naming
+  the variables; a read that *fails* falls back to offering Google.
+- **Email sign-in is Better Auth's `magicLink` and `emailOTP` plugins**
+  (`packages/auth/src/email-sign-in.ts`), registered only when `emailTransport()` is not
+  `off`. Mail goes to Resend over `fetch` (`email.ts`); the sign-in page reads
+  `signInOptions.email`. Hashed tokens, 10 minutes, single use. A code is the main path
+  because a mail scanner can open a link before the person does.
 - **A provider hides the social buttons, it does not disable them** —
   `/sign-in?method=google` and `?method=microsoft` still work, so a mistyped issuer
   cannot lock an admin out.

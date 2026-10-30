@@ -60,6 +60,7 @@ describe("Auth (e2e)", () => {
 			.get("/api/trpc/sso.signInOptions")
 			.expect(200);
 
+		const { isEmailSignInConfigured } = await import("@crm/auth/env");
 		const microsoftConfigured = Boolean(
 			process.env.MICROSOFT_CLIENT_ID && process.env.MICROSOFT_CLIENT_SECRET,
 		);
@@ -67,6 +68,7 @@ describe("Auth (e2e)", () => {
 		expect(response.body.result.data).toEqual({
 			google: true,
 			microsoft: microsoftConfigured,
+			email: isEmailSignInConfigured(),
 			providers: [],
 		});
 	});

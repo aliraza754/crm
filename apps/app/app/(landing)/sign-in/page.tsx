@@ -2,9 +2,11 @@ import type { MailboxProviderId } from "@crm/auth/scopes";
 import type { Metadata } from "next";
 import { redirect, unstable_rethrow } from "next/navigation";
 import { Suspense } from "react";
+import { Separator } from "@crm/ui/components/separator";
 import { AuthHeading, AuthShell } from "@/components/auth-shell";
 import { getSession } from "@/lib/session";
 import { getServerQueryClient, getServerTrpc } from "@/lib/trpc/server";
+import { EmailSignIn } from "./email-sign-in";
 import { SocialSignIn } from "./social-sign-in";
 import { type SsoProvider, SsoSignIn } from "./sso-sign-in";
 
@@ -15,6 +17,7 @@ export const metadata: Metadata = {
 type SignInOptions = {
 	google: boolean;
 	microsoft: boolean;
+	email: boolean;
 	providers: SsoProvider[];
 };
 
@@ -85,7 +88,10 @@ async function SignIn({
 				? configured
 				: [];
 
-	if (!showSso && social.length === 0) {
+	const showEmail = (options?.email ?? false) && insisted === undefined;
+	const hasButtons = showSso || social.length > 0;
+
+	if (!hasButtons && !showEmail) {
 		return (
 			<>
 				<AuthHeading
@@ -95,9 +101,9 @@ async function SignIn({
 
 				<p className="text-center text-muted-foreground text-sm/5">
 					Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET, or MICROSOFT_CLIENT_ID
-					and MICROSOFT_CLIENT_SECRET, in the root .env file and restart. Your
-					own identity provider can be added from Settings once somebody is
-					signed in.
+					and MICROSOFT_CLIENT_SECRET, or RESEND_API_KEY and RESEND_FROM for
+					sign-in by email, in the root .env file and restart. Your own identity
+					provider can be added from Settings once somebody is signed in.
 				</p>
 			</>
 		);
@@ -114,6 +120,8 @@ async function SignIn({
 			{social.map((provider) => (
 				<SocialSignIn key={provider} provider={provider} />
 			))}
+			{hasButtons && showEmail ? <Separator /> : null}
+			{showEmail ? <EmailSignIn /> : null}
 		</>
 	);
 }

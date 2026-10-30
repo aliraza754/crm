@@ -71,6 +71,14 @@ export class EnvironmentVariables {
 
 	@IsOptional()
 	@IsString()
+	RESEND_API_KEY?: string;
+
+	@IsOptional()
+	@IsString()
+	RESEND_FROM?: string;
+
+	@IsOptional()
+	@IsString()
 	SLACK_CLIENT_ID?: string;
 
 	@IsOptional()
