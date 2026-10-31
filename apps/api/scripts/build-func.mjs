@@ -11,6 +11,7 @@ import {
 } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { migrationDatabaseUrl } from "./database-tls.mjs";
 
 const apiDir = dirname(dirname(fileURLToPath(import.meta.url)));
 const repoRoot = dirname(dirname(apiDir));
@@ -202,7 +203,10 @@ if (!process.env.VERCEL) {
 	console.log("• no database URL at build time — skipping migrations");
 } else {
 	const dbDir = join(repoRoot, "packages/db");
-	const dbEnv = { ...process.env, DATABASE_URL: directDatabaseUrl };
+	const dbEnv = {
+		...process.env,
+		DATABASE_URL: migrationDatabaseUrl(directDatabaseUrl),
+	};
 
 	console.log("• applying migrations (prisma migrate deploy)...");
 	execSync(`${bun} x prisma migrate deploy`, {

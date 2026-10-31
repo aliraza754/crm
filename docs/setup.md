@@ -108,8 +108,15 @@ trusts it alongside Node's roots, keeps the hostname check, and removes any `ssl
 from the URL (pg lets the URL beat the option). It is checked in
 `packages/db/test/ssl-config.spec.ts`.
 
-That covers the running app and API. `prisma migrate deploy` in the build is a different
-client with its own TLS handling, so it is not covered by this setting.
+`prisma migrate deploy` in the build is Prisma's own client, not pg. On its own it
+encrypts but does not check the certificate chain, so `apps/api/scripts/database-tls.mjs`
+writes the same `DATABASE_SSL_CA` root to a temporary file and gives Prisma
+`sslmode=require&sslaccept=strict&sslcert=<that file>`. A wrong root then fails the build
+with `P1011 ... root certificate which is not trusted`, which is the point. It is checked in
+`apps/api/test/database-tls.spec.ts`.
+
+Without `DATABASE_SSL_CA` nothing here changes anything, and a URL with no `sslmode` makes `pg`
+connect **unencrypted**. Set it on every remote database.
 
 ## Migrations run on the production deploy, and nowhere else
 
