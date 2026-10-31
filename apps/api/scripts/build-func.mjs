@@ -11,6 +11,7 @@ import {
 } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { readCrons } from "./crons.mjs";
 import { migrationDatabaseUrl } from "./database-tls.mjs";
 
 const apiDir = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -178,7 +179,7 @@ writeFileSync(
 	JSON.stringify({
 		version: 3,
 		routes: [{ src: "/(.*)", dest: "/api/index" }],
-		crons: [{ path: "/internal/sync/google", schedule: "*/5 * * * *" }],
+		crons: readCrons(apiDir),
 	}),
 );
 
