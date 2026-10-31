@@ -98,6 +98,19 @@ the live database. On 2026-08-01 eleven migrations landed on Neon from a laptop.
    auto-loads the working directory's `.env` while Prisma's CLI only sees
    `@crm/env/load`.
 
+## Databases signed by their own root (Supabase)
+
+`@crm/db` hands the URL to `pg`, which reads `sslmode=require` as full verification
+against Node's built-in roots. A Supabase database chains to "Supabase Root 2021 CA",
+which is not one of them, so the connection fails with `self signed certificate in
+certificate chain`. Set `DATABASE_SSL_CA` to that root's PEM and `packages/db/src/ssl-config.ts`
+trusts it alongside Node's roots, keeps the hostname check, and removes any `sslmode`
+from the URL (pg lets the URL beat the option). It is checked in
+`packages/db/test/ssl-config.spec.ts`.
+
+That covers the running app and API. `prisma migrate deploy` in the build is a different
+client with its own TLS handling, so it is not covered by this setting.
+
 ## Migrations run on the production deploy, and nowhere else
 
 `apps/api/scripts/build-func.mjs` runs `prisma migrate deploy` during the crm-api

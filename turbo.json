@@ -5,6 +5,7 @@
 	"globalPassThroughEnv": [
 		"DATABASE_URL",
 		"DATABASE_URL_UNPOOLED",
+		"DATABASE_SSL_CA",
 		"TEST_DATABASE_URL",
 		"TEST_RUN_ID",
 		"BETTER_AUTH_SECRET",
