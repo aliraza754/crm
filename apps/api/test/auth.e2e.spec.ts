@@ -22,6 +22,8 @@ fallback("GOOGLE_CLIENT_SECRET", "test-google-client-secret");
 describe("Auth (e2e)", () => {
 	let app: INestApplication;
 
+	// Booting the whole Nest app takes a few seconds, and more on a slow disk. Bun's
+	// 5 s default for a hook failed every test in this file on one such machine.
 	beforeAll(async () => {
 		const { AppModule } = await import("../src/app.module");
 
@@ -31,7 +33,7 @@ describe("Auth (e2e)", () => {
 
 		app = moduleFixture.createNestApplication({ bodyParser: false });
 		await app.init();
-	});
+	}, 60_000);
 
 	afterAll(async () => {
 		await app.close();
