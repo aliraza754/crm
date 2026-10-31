@@ -3,19 +3,28 @@ import { EMAIL_SIGN_IN } from "./email-config";
 
 type EmailContent = Pick<AuthEmail, "subject" | "text" | "html">;
 
-const HTML_ESCAPES: Record<string, string> = {
-	"&": "&amp;",
-	"<": "&lt;",
-	">": "&gt;",
-	'"': "&quot;",
-	"'": "&#39;",
-};
-
 const IGNORE_NOTE =
 	"If you did not ask for this, ignore this email. Nobody can sign in without it.";
 
+function escapeChar(char: string): string {
+	switch (char) {
+		case "&":
+			return "&amp;";
+		case "<":
+			return "&lt;";
+		case ">":
+			return "&gt;";
+		case '"':
+			return "&quot;";
+		case "'":
+			return "&#39;";
+		default:
+			return char;
+	}
+}
+
 function escapeHtml(value: string): string {
-	return value.replace(/[&<>"']/g, (char) => HTML_ESCAPES[char] ?? char);
+	return value.replace(/[&<>"']/g, escapeChar);
 }
 
 function minutes(seconds: number): number {

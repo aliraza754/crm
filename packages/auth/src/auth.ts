@@ -29,7 +29,6 @@ import {
 	googleHostedDomainHint,
 	hasSignInAllowList,
 	isWorkspaceEmail,
-	primaryWorkspaceDomain,
 	refusalMessage,
 } from "./workspace";
 

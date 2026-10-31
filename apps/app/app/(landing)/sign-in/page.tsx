@@ -1,8 +1,8 @@
 import type { MailboxProviderId } from "@crm/auth/scopes";
+import { Separator } from "@crm/ui/components/separator";
 import type { Metadata } from "next";
 import { redirect, unstable_rethrow } from "next/navigation";
 import { Suspense } from "react";
-import { Separator } from "@crm/ui/components/separator";
 import { AuthHeading, AuthShell } from "@/components/auth-shell";
 import { getSession } from "@/lib/session";
 import { getServerQueryClient, getServerTrpc } from "@/lib/trpc/server";

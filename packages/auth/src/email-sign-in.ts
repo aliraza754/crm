@@ -11,7 +11,7 @@ import { isWorkspaceEmail, refusalMessage } from "./workspace";
 
 const CODE_REQUEST_PATH = "/email-otp/send-verification-otp";
 
-const codeRequestBody = z.object({ email: z.string() });
+export const codeRequestBody = z.object({ email: z.string() });
 
 export function assertMayReceiveEmail(email: string): void {
 	if (isWorkspaceEmail(email)) return;
@@ -20,11 +20,6 @@ export function assertMayReceiveEmail(email: string): void {
 
 export function isCodeRequestPath(path: string | undefined): boolean {
 	return path === CODE_REQUEST_PATH;
-}
-
-export function emailFromBody(body: unknown): string | null {
-	const parsed = codeRequestBody.safeParse(body);
-	return parsed.success ? parsed.data.email : null;
 }
 
 export async function sendSignInCode({
@@ -56,8 +51,8 @@ const emailSignInGuard = {
 			{
 				matcher: (context) => isCodeRequestPath(context.path),
 				handler: createAuthMiddleware(async (context) => {
-					const email = emailFromBody(context.body);
-					if (email) assertMayReceiveEmail(email);
+					const request = codeRequestBody.safeParse(context.body);
+					if (request.success) assertMayReceiveEmail(request.data.email);
 				}),
 			},
 		],

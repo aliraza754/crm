@@ -6,7 +6,7 @@ process.env.API_URL = "https://crm.example.test";
 const { sendAuthEmail } = await import("../src/email");
 const {
 	assertMayReceiveEmail,
-	emailFromBody,
+	codeRequestBody,
 	emailSignInPlugins,
 	isCodeRequestPath,
 	sendSignInCode,
@@ -145,12 +145,11 @@ describe("sending one email", () => {
 		const fetchSpy = stubFetch(422);
 		const errorSpy = spyOn(console, "error").mockImplementation(() => {});
 
-		const failure = await sendAuthEmail(message).catch(
-			(error: unknown) => error,
-		);
+		const failure = await sendAuthEmail(message).catch((error) => error);
 
 		expect(failure).toBeInstanceOf(APIError);
-		expect(String((failure as APIError).message)).not.toContain("re_test_key");
+		if (!(failure instanceof APIError)) throw failure;
+		expect(failure.message).not.toContain("re_test_key");
 		expect(errorSpy).toHaveBeenCalled();
 		expect(JSON.stringify(errorSpy.mock.calls)).not.toContain("re_test_key");
 
@@ -299,15 +298,17 @@ describe("refusing a stranger before the code is made", () => {
 	});
 
 	it("reads the address out of the request body", () => {
-		expect(emailFromBody({ email: "rep@acme.com", type: "sign-in" })).toBe(
-			"rep@acme.com",
-		);
+		const request = codeRequestBody.safeParse({
+			email: "rep@acme.com",
+			type: "sign-in",
+		});
+
+		expect(request.data?.email).toBe("rep@acme.com");
 	});
 
 	it("reads nothing out of a body that has no address", () => {
-		expect(emailFromBody({})).toBeNull();
-		expect(emailFromBody({ email: 5 })).toBeNull();
-		expect(emailFromBody(null)).toBeNull();
-		expect(emailFromBody("rep@acme.com")).toBeNull();
+		for (const body of [{}, { email: 5 }, null, "rep@acme.com"]) {
+			expect(codeRequestBody.safeParse(body).success).toBe(false);
+		}
 	});
 });
