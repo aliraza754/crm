@@ -155,6 +155,32 @@ DATABASE_URL="…" bunx prisma migrate diff \
   --from-config-datasource --to-schema prisma/schema.prisma --script
 ```
 
+## Every table has row-level security
+
+Supabase publishes the `public` schema through its Data API. Anybody with the
+project's public `anon` key can call that API. A table without row-level security
+is open to that key: it can be read, changed and emptied. Supabase flagged every
+table of this project on 2026-11-03.
+
+Row-level security with no policy closes the Data API and leaves the app alone. The
+app connects as `postgres`, the role that owns the tables, and the owner is not
+subject to row-level security. Any other role sees no rows and changes no rows.
+
+**Prisma does not write this statement. A migration that creates a table adds it:**
+
+```sql
+ALTER TABLE "newTable" ENABLE ROW LEVEL SECURITY;
+```
+
+`packages/db/test/row-level-security.spec.ts` replays every migration in order and
+fails on a table without it, with the migration that created the table. Prisma does
+not count row-level security as drift, so `migrate diff --exit-code` stays clean.
+
+- **Never use `FORCE ROW LEVEL SECURITY`.** It applies the rules to the owner too,
+  and the app then reads nothing. The spec refuses it.
+- **Keep the app on the role that owns the tables.** A different role sees empty
+  tables, because no policy grants it rows.
+
 ## Secrets hygiene
 
 `.gitignore` ignores `.env` and `.env.*` with one negation for `.env.example`, so
